@@ -2,36 +2,27 @@
 
 Futurevision Technologies IT & AI Interactive Gaming Lab and Business School.
 
-## Mobile-first application prototype
-
-This repository contains the first front-end prototype for the Project Grind 901 Academy platform.
-
-### Included in this release
-- Responsive mobile dashboard and navigation
+## Mobile-first application
+- Responsive dashboard and navigation
 - IT & AI Business School and Interactive Gaming Lab divisions
 - Sample course catalog
 - Preview areas for attendance, coursework, homework, projects, exams, boot camps and administration
-- Installable web-app manifest
-- Basic offline app-shell caching
+- Installable web-app manifest and basic offline app shell
 
-### Preview locally
-Open `index.html` in a web browser or serve the repository with a static web server.
+## Backend foundation
+The `supabase/schema.sql` file defines the initial Supabase database and row-level security policies. Follow [BACKEND_SETUP.md](BACKEND_SETUP.md) to configure it. The database is not yet connected to the public website; the current GitHub Pages site is a front-end prototype.
 
-### Publish with GitHub Pages
-1. Open repository **Settings**.
-2. Select **Pages**.
-3. Under Build and deployment, choose **Deploy from a branch**.
-4. Select branch `main` and folder `/ (root)`.
-5. Save and wait for GitHub Pages to publish.
+## Publish with GitHub Pages
+Repository **Settings → Pages → Deploy from a branch → main → /(root)**.
 
-### Important limitations
-This is a front-end prototype only. It does not yet provide live student authentication, secure student records, attendance capture, assignment uploads, grading, exam security, certificates or instructor/admin permissions. Do not enter real student personal information. Those functions require a secure backend database, authentication, row-level access controls, secure file storage and privacy/security testing.
+## Security notice
+Do not enter real student information yet. Live authentication, secure file storage, grading workflows, exam controls, backups, privacy review and full security testing are not complete. Never put Supabase service-role keys or database passwords in this public repository.
 
-### Next milestones
-1. Student and instructor authentication
-2. Database and row-level security
-3. Course enrollment and lesson delivery
-4. Verified attendance
-5. Assignment submissions and project tracking
-6. Exams, grading and feedback
-7. Boot camp registration and reporting
+## Roadmap
+1. Configure Supabase and run the schema
+2. Test student registration and role protection
+3. Connect the website to Supabase authentication
+4. Build course enrollment and lesson delivery
+5. Build verified attendance and assignment submissions
+6. Add projects, exams, grading and feedback
+7. Add boot camp registration and certificates
