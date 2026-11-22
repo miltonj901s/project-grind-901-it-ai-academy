@@ -3,26 +3,19 @@
 Futurevision Technologies IT & AI Interactive Gaming Lab and Business School.
 
 ## Mobile-first application
-- Responsive dashboard and navigation
+- Responsive academy dashboard and course catalog
 - IT & AI Business School and Interactive Gaming Lab divisions
-- Sample course catalog
-- Preview areas for attendance, coursework, homework, projects, exams, boot camps and administration
+- Student sign-in and registration portal (Supabase connection configuration required)
 - Installable web-app manifest and basic offline app shell
 
-## Backend foundation
-The `supabase/schema.sql` file defines the initial Supabase database and row-level security policies. Follow [BACKEND_SETUP.md](BACKEND_SETUP.md) to configure it. The database is not yet connected to the public website; the current GitHub Pages site is a front-end prototype.
+## Supabase setup
+1. Open `supabase-config.js` in GitHub and replace the two placeholders with your Supabase Project URL and **publishable** key.
+2. Never put a Supabase secret key, service_role key or database password in this public repository.
+3. In Supabase Authentication → URL Configuration, set the Site URL to your published site and add the exact portal URL to Redirect URLs, for example `https://futurevisiontech.org/portal.html`.
+4. Open `https://futurevisiontech.org/portal.html` and test registration using a test email address.
+5. New signups receive the student role. Promote staff only through a controlled administrator process.
 
-## Publish with GitHub Pages
-Repository **Settings → Pages → Deploy from a branch → main → /(root)**.
+The database schema is in `supabase/schema.sql`. See [BACKEND_SETUP.md](BACKEND_SETUP.md). Course records and student workflow screens are not yet fully connected.
 
-## Security notice
-Do not enter real student information yet. Live authentication, secure file storage, grading workflows, exam controls, backups, privacy review and full security testing are not complete. Never put Supabase service-role keys or database passwords in this public repository.
-
-## Roadmap
-1. Configure Supabase and run the schema
-2. Test student registration and role protection
-3. Connect the website to Supabase authentication
-4. Build course enrollment and lesson delivery
-5. Build verified attendance and assignment submissions
-6. Add projects, exams, grading and feedback
-7. Add boot camp registration and certificates
+## Security
+The repository is public. Only the Supabase URL and publishable key belong in browser configuration. RLS must remain enabled. Do not enter real student records until authentication, policies, file storage, backups and privacy requirements are tested.
