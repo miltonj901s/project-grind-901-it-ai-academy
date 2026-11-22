@@ -15,7 +15,7 @@ This project currently has a static GitHub Pages front end. This guide prepares 
 4. Paste into SQL Editor and click **Run**.
 5. Confirm the query completes without errors. Review any error before retrying.
 
-The schema creates profiles, courses, enrollments, lessons, attendance, assignments, submissions, projects, exams, exam attempts, boot camps and boot camp enrollments. Row Level Security is enabled. New accounts receive the student role by default; users cannot promote themselves through their profile.
+The schema creates profiles, courses, enrollments, lessons, attendance, assignments, submissions, projects, exams, exam attempts, boot camps and boot camp enrollments. Row Level Security is enabled. New accounts receive the student role by default; users cannot promote themselves through their profile. In this initial version, only administrators receive staff-wide data access. Instructor access is intentionally restricted until course-specific instructor assignments and policies are implemented.
 
 ## 3. Create the first administrator safely
 After you register your own account through Supabase Authentication, find that account's UUID in **Authentication → Users**. In SQL Editor, run this statement after replacing the UUID:
