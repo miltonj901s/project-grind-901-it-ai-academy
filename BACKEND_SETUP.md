@@ -1,45 +1,23 @@
 # Backend setup — Project Grind 901 Academy
 
-This project currently has a static GitHub Pages front end. This guide prepares a secure backend using Supabase; the database is not connected to the website yet.
+## Database
+The initial Supabase schema is in `supabase/schema.sql`. It creates profiles, courses, enrollments, lessons, attendance, assignments, submissions, projects, exams, exam attempts, boot camps and boot camp enrollments with Row Level Security.
 
-## 1. Create the Supabase project
-1. Visit https://supabase.com/ and create/sign in to an account.
-2. Create a new project named `project-grind-901-academy`.
-3. Choose a strong database password and save it privately.
-4. Select a region suitable for your users and wait for provisioning.
+## Connect the browser app
+1. In Supabase, open **Project Settings → API Keys**.
+2. Copy the **Project URL** and **publishable key** only.
+3. In GitHub, open `supabase-config.js`, tap the pencil (Edit), replace the two placeholder strings, and commit the change to `main`.
+4. Do not use or publish the `service_role` or any secret key. This repository is public.
+5. In Supabase, open **Authentication → URL Configuration**.
+6. Set **Site URL** to the exact published site origin, e.g. `https://futurevisiontech.org`.
+7. Add the exact portal URL to **Redirect URLs**, e.g. `https://futurevisiontech.org/portal.html`. If you also use the GitHub Pages hostname, add that exact portal URL too.
+8. Open `https://futurevisiontech.org/portal.html`. Create a test account with an email you can access. If email confirmation is enabled, click the confirmation link before signing in.
 
-## 2. Create the initial database
-1. In the Supabase project, open **SQL Editor**.
-2. Choose **New query**.
-3. Open `supabase/schema.sql` in this GitHub repository and copy its complete contents.
-4. Paste into SQL Editor and click **Run**.
-5. Confirm the query completes without errors. Review any error before retrying.
+## Test expectations
+- A new account should be assigned the `student` role by the database trigger.
+- The signed-in portal should display the account email and its own profile role.
+- A student should not be able to read another student's profile or academic records.
+- Never test with real student personal information until the full security review is complete.
 
-The schema creates profiles, courses, enrollments, lessons, attendance, assignments, submissions, projects, exams, exam attempts, boot camps and boot camp enrollments. Row Level Security is enabled. New accounts receive the student role by default; users cannot promote themselves through their profile. In this initial version, only administrators receive staff-wide data access. Instructor access is intentionally restricted until course-specific instructor assignments and policies are implemented.
-
-## 3. Create the first administrator safely
-After you register your own account through Supabase Authentication, find that account's UUID in **Authentication → Users**. In SQL Editor, run this statement after replacing the UUID:
-
-```sql
-update public.profiles
-set role = 'admin'
-where id = 'REPLACE-WITH-YOUR-AUTH-USER-UUID';
-```
-
-Do not make public signup assign instructor or administrator roles.
-
-## 4. Keep credentials safe
-- The Supabase project URL and publishable/anon key may be used by a browser app when Row Level Security is correctly enabled.
-- Never expose the `service_role` key, database password, or other secret keys in GitHub, HTML, JavaScript, screenshots or public messages.
-- Do not enter real student records until authentication, policies, storage permissions, backups and privacy requirements have been tested.
-
-## 5. What is not connected yet
-GitHub Pages remains a static host. This SQL schema is a backend foundation only; it does not itself create login screens, connect the site to Supabase, upload assignment files, or verify attendance. The next development step is a tested sign-in flow using the Supabase client and the public project URL/key, followed by role-aware pages.
-
-## 6. Initial test plan
-- Register a test student account.
-- Verify a profile row is created with role `student`.
-- Verify the student cannot read another student's profile or records.
-- Verify the student cannot change their own role.
-- Promote a test staff account only from the SQL Editor.
-- Verify staff-only actions are unavailable to students.
+## Important current limitations
+The portal currently provides basic Supabase email/password registration, sign-in, session display and sign-out. It does not yet implement password reset, MFA, course enrollment UI, attendance capture, file uploads, grading, secure exam delivery or instructor-specific course permissions. The initial RLS policy grants staff-wide access only to administrators; instructor permissions need course-scoped policies before instructors use real records. Review privacy, consent, retention, backups, email delivery and applicable education-record requirements before production use.
