@@ -1,0 +1,66 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#11152b"><title>Student Portal | Project Grind 901</title>
+<style>
+:root{color-scheme:dark;--bg:#0e1326;--panel:#19213b;--line:#35415f;--ink:#f7f8ff;--muted:#b8c1dc;--accent:#aaaaff;--teal:#8ce6d4}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--ink);font:16px system-ui,sans-serif}.wrap{max-width:560px;margin:auto;padding:22px 16px 50px}.brand{color:var(--teal);letter-spacing:2px;font-weight:800;font-size:12px}.card{background:var(--panel);border:1px solid var(--line);border-radius:18px;padding:20px;margin-top:18px}h1{font-size:25px;margin:8px 0}p{color:var(--muted);line-height:1.5}.tabs{display:flex;gap:8px;margin:18px 0}.tabs button,button{border:0;border-radius:11px;padding:12px 15px;font:inherit;cursor:pointer}.tabs button{background:#283252;color:var(--muted);flex:1}.tabs button.active,.primary{background:#aaaaff;color:#17172d;font-weight:700}.field{display:block;margin:13px 0}.field span{display:block;font-size:13px;color:var(--muted);margin-bottom:6px}input{width:100%;padding:13px;border-radius:10px;border:1px solid var(--line);background:#10182d;color:var(--ink);font:inherit}.primary{width:100%;margin-top:12px}.secondary{background:#283252;color:var(--ink)}.status{padding:12px;border-radius:10px;background:#202c49;color:var(--muted);margin-top:14px;white-space:pre-wrap}.hidden{display:none!important}.small{font-size:12px;color:var(--muted)}a{color:var(--accent)}.row{display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap}
+</style></head>
+<body><main class="wrap">
+<div class="brand">PROJECT GRIND 901</div><h1>Student & Staff Portal</h1><p>Sign in to access your academy account. New registrations are assigned the student role automatically.</p>
+<section class="card" id="authCard">
+<div class="tabs"><button id="loginTab" class="active" type="button">Sign in</button><button id="signupTab" type="button">Create account</button></div>
+<form id="authForm">
+<label class="field hidden" id="nameField"><span>Full name</span><input id="fullName" autocomplete="name" maxlength="100"></label>
+<label class="field"><span>Email address</span><input id="email" type="email" autocomplete="email" required></label>
+<label class="field"><span>Password</span><input id="password" type="password" autocomplete="current-password" minlength="8" required></label>
+<button class="primary" id="submitBtn" type="submit">Sign in</button>
+</form><div class="status" id="message" role="status">Use your academy account. If email confirmation is enabled, check your inbox after registration.</div>
+</section>
+<section class="card hidden" id="profileCard">
+<div class="row"><h2>My account</h2><button class="secondary" id="signOut" type="button">Sign out</button></div>
+<p id="welcome"></p><p><strong>Email:</strong> <span id="profileEmail"></span></p><p><strong>Account role:</strong> <span id="profileRole">student</span></p>
+<p class="small">Your account is connected. Course enrollment, attendance, assignments, exams and grades will be added in upcoming development steps.</p>
+</section>
+<p class="small"><a href="./index.html">← Return to Academy Home</a></p>
+</main>
+<script type="module">
+import { createClient } from "https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm";
+import { SUPABASE_URL, SUPABASE_PUBLISHABLE_KEY } from "./supabase-config.js";
+const $=id=>document.getElementById(id);
+const msg=(text)=>$("message").textContent=text;
+let mode="login";
+function setMode(next){mode=next;$("loginTab").classList.toggle("active",mode==="login");$("signupTab").classList.toggle("active",mode==="signup");$("nameField").classList.toggle("hidden",mode!=="signup");$("fullName").required=mode==="signup";$("submitBtn").textContent=mode==="login"?"Sign in":"Create student account";$("password").autocomplete=mode==="login"?"current-password":"new-password";msg(mode==="login"?"Sign in with your academy account.":"New accounts are created with the student role.");}
+$("loginTab").addEventListener("click",()=>setMode("login"));$("signupTab").addEventListener("click",()=>setMode("signup"));
+const configured=SUPABASE_URL.startsWith("https://") && SUPABASE_PUBLISHABLE_KEY.length>20 && !SUPABASE_URL.includes("PASTE_") && !SUPABASE_PUBLISHABLE_KEY.includes("PASTE_");
+if(!configured){$("submitBtn").disabled=true;msg("Setup required: edit supabase-config.js in your GitHub repository and replace both placeholders with your Supabase Project URL and publishable key. Do not use a secret or service_role key.");}
+else{
+ const supabase=createClient(SUPABASE_URL,SUPABASE_PUBLISHABLE_KEY);
+ async function showUser(user){
+  if(!user){$("authCard").classList.remove("hidden");$("profileCard").classList.add("hidden");return;}
+  $("authCard").classList.add("hidden");$("profileCard").classList.remove("hidden");$("profileEmail").textContent=user.email||"";
+  const {data,error}=await supabase.from("profiles").select("full_name,role").eq("id",user.id).maybeSingle();
+  if(error){$("welcome").textContent="Signed in. Profile details could not be loaded yet.";return;}
+  $("welcome").textContent="Welcome, "+(data?.full_name||"Academy student")+"."; $("profileRole").textContent=data?.role||"student";
+ }
+ $("authForm").addEventListener("submit",async e=>{
+  e.preventDefault();$("submitBtn").disabled=true;msg("Please wait…");
+  try{
+   const email=$("email").value.trim(),password=$("password").value;
+   if(mode==="signup"){
+    const fullName=$("fullName").value.trim();if(!fullName){msg("Enter your full name.");return;}
+    const {data,error}=await supabase.auth.signUp({email,password,options:{data:{full_name:fullName},emailRedirectTo:location.origin+location.pathname}});
+    if(error)throw error;
+    if(data.session)await showUser(data.user);else msg("Registration received. Check your email for a confirmation link, then return here and sign in.");
+   }else{
+    const {data,error}=await supabase.auth.signInWithPassword({email,password});if(error)throw error;await showUser(data.user);
+   }
+  }catch(error){msg(error.message||"We could not complete that request.");}
+  finally{$("submitBtn").disabled=false;}
+ });
+ $("signOut").addEventListener("click",async()=>{const {error}=await supabase.auth.signOut();if(error)msg(error.message);else showUser(null);});
+ supabase.auth.onAuthStateChange((_event,session)=>{showUser(session?.user||null);});
+ supabase.auth.getSession().then(({data})=>showUser(data.session?.user||null));
+}
+</script></body></html>
