@@ -30,7 +30,7 @@ create or replace function public.is_staff()
 returns boolean language sql stable security definer set search_path = public
 as $$
   select exists (select 1 from public.profiles
-    where id = auth.uid() and role in ('instructor','admin'));
+    where id = auth.uid() and role = 'admin');
 $$;
 
 create or replace function public.is_admin()
@@ -196,6 +196,50 @@ alter table public.exams enable row level security;
 alter table public.exam_attempts enable row level security;
 alter table public.bootcamps enable row level security;
 alter table public.bootcamp_enrollments enable row level security;
+
+-- Until course-specific instructor assignments are implemented, only administrators
+-- receive staff-wide access to student records. Instructor role access is intentionally
+-- restricted rather than granting every instructor access to every student's data.
+
+-- Prevent students from editing grades, feedback or grading identity on their own work.
+create or replace function public.protect_submission_grade()
+returns trigger language plpgsql security definer set search_path = public
+as $
+begin
+  if auth.uid() = old.student_id and (
+    new.grade is distinct from old.grade or
+    new.feedback is distinct from old.feedback or
+    new.graded_by is distinct from old.graded_by or
+    new.assignment_id is distinct from old.assignment_id or
+    new.student_id is distinct from old.student_id
+  ) then
+    raise exception 'Students cannot change grading fields or submission ownership.';
+  end if;
+  return new;
+end;
+$;
+drop trigger if exists protect_submission_grade_trigger on public.submissions;
+create trigger protect_submission_grade_trigger before update on public.submissions
+for each row execute procedure public.protect_submission_grade();
+
+-- Prevent students from changing exam scores or attempt ownership.
+create or replace function public.protect_exam_attempt_score()
+returns trigger language plpgsql security definer set search_path = public
+as $
+begin
+  if auth.uid() = old.student_id and (
+    new.score is distinct from old.score or
+    new.exam_id is distinct from old.exam_id or
+    new.student_id is distinct from old.student_id
+  ) then
+    raise exception 'Students cannot change exam scores or attempt ownership.';
+  end if;
+  return new;
+end;
+$;
+drop trigger if exists protect_exam_attempt_score_trigger on public.exam_attempts;
+create trigger protect_exam_attempt_score_trigger before update on public.exam_attempts
+for each row execute procedure public.protect_exam_attempt_score();
 
 -- Profiles
 drop policy if exists "Profiles view own or admin" on public.profiles;
