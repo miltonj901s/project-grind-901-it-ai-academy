@@ -210,7 +210,7 @@ alter table public.bootcamp_enrollments enable row level security;
 -- Prevent students from editing grades, feedback or grading identity on their own work.
 create or replace function public.protect_submission_grade()
 returns trigger language plpgsql security definer set search_path = public
-as $
+as $$
 begin
   if auth.uid() = old.student_id and (
     new.grade is distinct from old.grade or
@@ -223,7 +223,7 @@ begin
   end if;
   return new;
 end;
-$;
+$$;
 drop trigger if exists protect_submission_grade_trigger on public.submissions;
 create trigger protect_submission_grade_trigger before update on public.submissions
 for each row execute procedure public.protect_submission_grade();
@@ -231,7 +231,7 @@ for each row execute procedure public.protect_submission_grade();
 -- Prevent students from changing exam scores or attempt ownership.
 create or replace function public.protect_exam_attempt_score()
 returns trigger language plpgsql security definer set search_path = public
-as $
+as $$
 begin
   if auth.uid() = old.student_id and (
     new.score is distinct from old.score or
@@ -242,7 +242,7 @@ begin
   end if;
   return new;
 end;
-$;
+$$;
 drop trigger if exists protect_exam_attempt_score_trigger on public.exam_attempts;
 create trigger protect_exam_attempt_score_trigger before update on public.exam_attempts
 for each row execute procedure public.protect_exam_attempt_score();
