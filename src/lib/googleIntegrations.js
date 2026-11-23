@@ -1,0 +1,3 @@
+export const googleStatus={oauthConfigured:Boolean(import.meta.env.VITE_GOOGLE_CLIENT_ID),classroom:'Not connected',meet:'Not connected',calendar:'Not connected'};
+export function getGoogleStatus(){return{...googleStatus,oauth:googleStatus.oauthConfigured?'Client ID configured':'OAuth not configured'};}
+// OAuth and Google API access require a trusted backend, consent screen, scopes and token handling. No integration is marked active until verified.
